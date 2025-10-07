@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Finalize Order{% endblock %}
+
+{% block content %}
+<h1 class="mb-4 text-center">Finalize Your Order</h1>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Contact Details & Summary</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <h5 class="text-primary mb-3">Your Information</h5>
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="text-danger">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <h5 class="text-success mt-4">Order Total</h5>
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                        <span class="fs-4 fw-bold">Grand Total:</span>
+                        <span class="fs-4 fw-bold text-success">${{ total_price|floatformat:2 }}</span>
+                    </div>
+                    
+                    <p class="text-muted mt-3">
+                        *Note: Payment is simulated upon order submission.
+                    </p>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            Place Order & Pay Now
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

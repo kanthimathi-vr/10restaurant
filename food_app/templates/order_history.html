@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}My Order History{% endblock %}
+
+{% block content %}
+<h1 class="mb-5 text-center">Your Order History</h1>
+
+{% if orders %}
+    <div class="row">
+    {% for order in orders %}
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Order #{{ order.id }}</h5>
+                    <span class="badge 
+                        {% if order.status == 'PENDING' %}bg-warning text-dark
+                        {% elif order.status == 'PREPARING' %}bg-info
+                        {% elif order.status == 'COMPLETED' %}bg-success
+                        {% else %}bg-secondary{% endif %}
+                    p-2 fs-6">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text mb-1"><strong>Date:</strong> {{ order.created_at|date:"M d, Y" }} at {{ order.created_at|time:"P" }}</p>
+                    <p class="card-text mb-1"><strong>Total:</strong> <span class="text-success fw-bold">${{ order.total_price|floatformat:2 }}</span></p>
+                    <p class="card-text mb-3"><strong>Recipient:</strong> {{ order.name }} ({{ order.phone_number }})</p>
+                    
+                    <h6>Items Ordered:</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for item in order.items.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ item.quantity }}x {{ item.menu_item.name|default:"[Deleted Item]" }}</span>
+                                <span class="text-muted">${{ item.price|floatformat:2 }} ea.</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info text-center py-5" role="alert">
+        <h4 class="alert-heading">No Orders Found</h4>
+        <p>It looks like you haven't placed an order with us yet. Let's change that!</p>
+        <a href="{% url 'menu_list' %}" class="btn btn-info mt-3">Start Ordering</a>
+    </div>
+{% endif %}
+{% endblock %}

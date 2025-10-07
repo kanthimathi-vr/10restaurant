@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Restaurant Order Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-4 text-center">Restaurant Order Dashboard</h1>
+
+<div class="alert alert-warning text-center">
+    <strong>Welcome, Staff!</strong> Use the Django Admin panel to update order statuses quickly.
+</div>
+
+<div class="row">
+    <!-- PENDING Orders -->
+    <div class="col-md-6">
+        <h3 class="text-danger border-bottom pb-2">🔴 Pending Orders (New)</h3>
+        {% include 'partials/order_table.html' with orders=pending_orders table_color='table-danger' status_badge='bg-danger' status_text='NEW' %}
+    </div>
+
+    <!-- PREPARING Orders -->
+    <div class="col-md-6">
+        <h3 class="text-primary border-bottom pb-2">🧑‍🍳 Orders in Preparation</h3>
+        {% include 'partials/order_table.html' with orders=preparing_orders table_color='table-primary' status_badge='bg-info' status_text='PREPARING' %}
+    </div>
+</div>
+
+<h3 class="mt-5 text-success border-bottom pb-2">✅ Recently Completed</h3>
+<div class="table-responsive">
+    <table class="table table-sm table-striped">
+        <thead class="table-success">
+            <tr><th>ID</th><th>Total</th><th>Customer</th><th>Completed At</th></tr>
+        </thead>
+        <tbody>
+            {% for order in recent_completed %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>${{ order.total_price|floatformat:2 }}</td>
+                <td>{{ order.name }}</td>
+                <td>{{ order.updated_at|date:"H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center">No recent completed orders.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- PARTIAL TABLE DEFINITION (Dashboard helper) -->
+{% verbatim %}
+{% block partial_order_table %}
+{% load static %}
+<div style="display: none;">
+    {% include 'partials/order_table.html' %} 
+</div>
+{% endblock %}
+{% endverbatim %}
+
+<div class="d-none">
+    <template id="order-table-template">
+        <table class="table table-bordered table-hover">
+            <thead class="{{ table_color }}">
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr data-order-id="{{ order.id }}">
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.name }} ({{ order.phone_number }})</td>
+                    <td>${{ order.total_price|floatformat:2 }}</td>
+                    <td><span class="badge {{ status_badge }}">{{ order.get_status_display }}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#orderItems{{ order.id }}" aria-expanded="false">
+                            View Items
+                        </button>
+                    </td>
+                </tr>
+                <tr class="collapse" id="orderItems{{ order.id }}">
+                    <td colspan="5" class="bg-light">
+                        <ul class="list-group list-group-flush">
+                            {% for item in order.items.all %}
+                                <li class="list-group-item">{{ item.quantity }}x {{ item.menu_item.name|default:"[Item Deleted]" }} (${{ item.price|floatformat:2 }})</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center">No {{ status_text }} orders at the moment.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </template>
+</div>
+<script>
+    // Simple script to render the partial table logic for the dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        const partials = document.querySelectorAll('.dashboard-partial');
+        partials.forEach(partial => {
+            if (partial.querySelector('table')) return; 
+
+            const template = document.getElementById('order-table-template');
+            if (template) {
+                const clone = template.content.cloneNode(true);
+                partial.appendChild(clone);
+            }
+        });
+    });
+</script>
+{% endblock %}

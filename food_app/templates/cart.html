@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Shopping Cart{% endblock %}
+
+{% block content %}
+<h1 class="mb-4 text-center">Your Shopping Cart</h1>
+
+{% if cart_items %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <table class="table table-hover table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Item</th>
+                    <th class="text-center">Price</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-end">Total</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td class="text-center">${{ item.price|floatformat:2 }}</td>
+                    <td class="text-center">
+                        <span class="badge bg-secondary rounded-pill fs-6">{{ item.quantity }}</span>
+                    </td>
+                    <td class="text-end fw-bold">${{ item.total_item_price|floatformat:2 }}</td>
+                    <td class="text-center">
+                        <!-- Remove button is optional, but adds usability -->
+                        <a href="{% url 'remove_from_cart' item.id %}" class="btn btn-sm btn-outline-danger">
+                            - 1
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="table-primary fw-bold">
+                    <td colspan="3" class="text-end">Subtotal:</td>
+                    <td class="text-end">${{ subtotal|floatformat:2 }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+            <a href="{% url 'menu_list' %}" class="btn btn-outline-secondary btn-lg">Continue Shopping</a>
+            <a href="{% url 'checkout' %}" class="btn btn-success btn-lg">Proceed to Checkout</a>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="alert alert-info text-center py-5" role="alert">
+    <h4 class="alert-heading">Your cart is empty!</h4>
+    <p>Time to load up on some delicious food.</p>
+    <a href="{% url 'menu_list' %}" class="btn btn-info mt-3">View Menu</a>
+</div>
+{% endif %}
+{% endblock %}
